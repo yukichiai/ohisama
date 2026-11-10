@@ -1,0 +1,154 @@
+/* エリア共通の画面まわり（はじめの画面・操作の説明・移動のつまみ・音のボタン）。forest_path.html と flower_hill.html が使う */
+html, body { margin: 0; height: 100%; overflow: hidden; background: #16302f; overscroll-behavior: none; }
+body { font: 600 14px/1.6 system-ui, "Yu Gothic UI", "Hiragino Sans", sans-serif; color: #f4fbf6;
+       -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+canvas { display: block; touch-action: none; }
+
+/* はじめの画面（最初のタップで音を鳴らす許可をもらう） */
+#gate { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+        cursor: pointer; text-align: center; background: radial-gradient(ellipse at 50% 42%, rgba(12,32,34,.15), rgba(8,22,26,.72));
+        transition: opacity .9s ease; }
+#gate.off { opacity: 0; pointer-events: none; }
+#gate h1 { margin: 0; font-size: clamp(26px, 6vw, 44px); letter-spacing: .28em; text-indent: .28em; font-weight: 700;
+           text-shadow: 0 2px 18px rgba(6,24,26,.8), 0 0 40px rgba(255,214,230,.35); }
+/* エリア名：オリジナルの字「Ohisama Title」（「おひさまのかけら」のタイトルと同じ字。fonts/ohisama_title.woff2）。area_kit.js の wireStart が、表にあるエリア名の <h1> に .areaName を付ける
+   太さはどれを指定しても同じ字（にせの太字にしない）。読みこむ前・入っていない字は、うしろに書いた端末のフォントで出る。長い名前は、単語の切れ目で 2 行になる */
+@font-face { font-family: "Ohisama Title"; src: url("./fonts/ohisama_title.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+#gate h1.areaName { box-sizing: border-box; max-width: 100%; padding: 0 6vw; font-family: "Ohisama Title", system-ui, "Yu Gothic UI", "Hiragino Sans", sans-serif; font-synthesis: none;
+           font-size: clamp(30px, 9vw, 62px); line-height: 1.3; letter-spacing: .08em; text-indent: .08em; color: #fffdf2; word-break: keep-all; overflow-wrap: break-word; text-wrap: balance;
+           text-shadow: 0 2px 14px rgba(4,8,30,.92), 0 0 3px rgba(4,8,30,.8), 0 0 38px rgba(255,224,150,.42); }
+/* 太陽ゲーム（?game=sun）：日本語のそえ書きは出さず、ボタンはタイトル画面と同じ「Start」 */
+#gate.sunArea .sub { display: none; }
+/* ===== 太陽ゲーム（?game=sun）のエリア名と Start：UI 案 C「筆と和紙」（ui_design/ui_design.md の「4. エリア名」。フォントは ui_design/ui_c_fonts.css から貼ったもの）=====
+   字：言語ごとの "Ohisama C Title <言語>"（#gate の data-lang ＝ area_kit.js の showAreaName が付ける）。白 → 淡い金のグラデーションの字に、かすかな光と墨の影（drop-shadow）。ふち・板はつけない
+   Start：タイトル画面の Start と同じ（280×56px、スマホ縦 240×52px。墨のにじみの面 ＋ 左右に細い金の線、字がゆっくり光る）。大樹の花まつり側（?game=sun なし）は、上の今までの形のまま */
+@font-face { font-family: "Ohisama C Title ja"; src: url("./fonts/ui_c_title_ja.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }  /* Yuji Syuku */
+@font-face { font-family: "Ohisama C Title en"; src: url("./fonts/ui_c_title_en.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }  /* Yuji Syuku */
+@font-face { font-family: "Ohisama C Title zh"; src: url("./fonts/ui_c_title_zh.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }  /* LXGW WenKai TC Regular */
+@font-face { font-family: "Ohisama C Title ko"; src: url("./fonts/ui_c_title_ko.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }  /* Song Myung */
+#gate.sunArea h1.areaName { font-size: 50px; font-weight: 400; line-height: 1.5; letter-spacing: .36em; text-indent: 0; padding: .1em 6vw .12em calc(6vw + .36em);      /* 字間のぶん左をあけて、どの行もまん中に（text-indent は 1 行めにしか効かないので使わない） */
+  color: #fffaf0; background: linear-gradient(180deg, #ffffff 15%, #f0deaa 95%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  text-shadow: none; filter: drop-shadow(0 0 10px rgba(255,233,176,.28)) drop-shadow(0 2px 5px rgba(12,10,34,.75)); }
+#gate.sunArea[data-lang="ja"] h1.areaName { font-family: "Ohisama C Title ja", "Yu Mincho", "Hiragino Mincho ProN", serif; }
+#gate.sunArea[data-lang="en"] h1.areaName { font-family: "Ohisama C Title en", Georgia, serif; letter-spacing: .2em; padding-left: calc(6vw + .2em); }
+#gate.sunArea[data-lang="zh"] h1.areaName { font-family: "Ohisama C Title zh", "Songti SC", "SimSun", serif; }
+#gate.sunArea[data-lang="ko"] h1.areaName { font-family: "Ohisama C Title ko", "AppleMyungjo", "Batang", serif; }
+#gate.sunArea .tap { position: relative; box-sizing: border-box; width: 280px; height: 56px; margin: 22px 0 0; padding: 0; border: 0; border-radius: 28px; backdrop-filter: none; -webkit-backdrop-filter: none; -webkit-tap-highlight-color: transparent;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(8,8,24,.42), rgba(8,8,24,0) 100%); color: #fffaf0; opacity: 1;
+  font-family: "Ohisama C Title en", Georgia, serif; font-size: 26px; font-weight: 400; font-synthesis: none; line-height: 56px; letter-spacing: .4em; text-indent: .4em;
+  text-shadow: 0 0 12px rgba(255,233,176,.35), 0 1px 4px rgba(8,8,24,.85); animation: cStartGlow 2.8s ease-in-out infinite; transition: transform .12s ease; }      /* 面の色は変化させない（読みこみ直後、今までの白い板から ゆっくり消えていくのが見えてしまうので） */
+#gate.sunArea .tap::before, #gate.sunArea .tap::after { content: ''; position: absolute; top: 50%; width: 44px; height: 1px; background: linear-gradient(90deg, rgba(240,222,170,0), rgba(240,222,170,.8)); }
+#gate.sunArea .tap::before { left: 16px; } #gate.sunArea .tap::after { right: 16px; transform: scaleX(-1); }
+@media (hover: hover) { #gate.sunArea .tap:hover { background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,246,220,.12), rgba(8,8,24,.25) 60%, rgba(8,8,24,0) 100%); } }      /* マウスを Start に乗せたとき（画面ぜんたいが押せる所なので、#gate:hover ではいつも光ってしまう） */
+#gate.sunArea:active .tap { background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,246,220,.24), rgba(255,246,220,0) 100%); transform: scale(.97); animation: none; }
+@keyframes cStartGlow { 0%, 100% { text-shadow: 0 0 8px rgba(255,233,176,.2), 0 1px 4px rgba(8,8,24,.85); } 50% { text-shadow: 0 0 16px rgba(255,233,176,.55), 0 1px 4px rgba(8,8,24,.85); } }
+@media (orientation: portrait) {                                    /* スマホの縦画面 */
+  #gate.sunArea h1.areaName { font-size: clamp(30px, 8.6vw, 50px); letter-spacing: .24em; padding-left: calc(6vw + .24em); }
+  #gate.sunArea[data-lang="en"] h1.areaName { font-size: clamp(24px, 7.4vw, 50px); letter-spacing: .16em; padding-left: calc(6vw + .16em); }      /* 英語は少し小さく：Glowing Mushroom Valley が 2 行に入る（仕様の 8.6vw・.2em では 3 行になる） */
+  #gate.sunArea .tap { width: 240px; height: 52px; line-height: 52px; font-size: 24px; margin-top: 16px; }
+  #gate.sunArea .tap::before { left: 12px; } #gate.sunArea .tap::after { right: 12px; }
+  #gate.sunArea .tap::before, #gate.sunArea .tap::after { width: 36px; }
+}
+/* 太陽ゲームで、ほかのエリアから来たとき（html.sunAuto。area_kit.js が付ける）：Start もそえ書きも出さない。読みこみ中は暗い画面にエリア名だけが静かに浮かぶ。
+   画面は押せない（指・クリックは景色の操作へ）。消えるときは 1.2 秒かけて、ゆっくり景色へ。エリアを出るときのフェードも、白ではなく、この暗い色（html.sunGame） */
+html.sunAuto #gate { background: #070a16; pointer-events: none; cursor: default; transition: opacity 1.2s ease; }
+html.sunAuto #gate .tap, html.sunAuto #gate .sub { display: none; }
+html.sunAuto #gate h1 { animation: sunNameIn 1.1s ease both; }
+@keyframes sunNameIn { from { opacity: 0; } to { opacity: 1; } }
+html.sunGame #areaFade { background: #070a16; }
+/* 太陽ゲーム：右上のボタン（音・視点）を UI 案 C「筆と和紙」に（ui_design/ui_design.md の「音のオン・オフ」と同じ形）。
+   44×44px の丸（押せる範囲も 44px）、線 1px のうすい白、面は ごくうすい墨、アイコンは 20px・線 1.3。乗せる＝面がうすく明るく／押す＝少し小さく・面が明るく。
+   音を消している＝全体がうすい（アイコンは ×）。視点が 1 人称＝淡い金の細い輪とかすかな光（選んでいる印）。キーボードで選んだ＝淡い金の線 */
+html.sunGame #soundBtn, html.sunGame #viewBtn { right: calc(14px + env(safe-area-inset-right)); width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  border: 1px solid rgba(251,246,230,.34); background: rgba(8,8,24,.24); color: rgba(251,246,230,.92); box-shadow: none;
+  transition: opacity .8s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease; }
+html.sunGame #soundBtn { top: calc(14px + env(safe-area-inset-top)); }
+html.sunGame #viewBtn { display: none !important; }                /* 太陽ゲーム：視点のボタンは出さない（いつも 3 人称）。音のボタンだけが右上のすみ */
+html.sunGame #soundBtn svg, html.sunGame #viewBtn svg { display: block; width: 20px; height: 20px; margin: auto; filter: drop-shadow(0 1px 3px rgba(8,8,24,.8)); }
+html.sunGame #soundBtn svg *, html.sunGame #viewBtn svg * { stroke-width: 1.3; }
+html.sunGame #soundBtn .off, html.sunGame #viewBtn .fp { display: none; }
+html.sunGame #soundBtn.muted .on, html.sunGame #viewBtn.fp .tp { display: none; }
+html.sunGame #soundBtn.muted .off, html.sunGame #viewBtn.fp .fp { display: block; }
+html.sunGame #soundBtn.muted { opacity: .6; border-color: rgba(251,246,230,.22); }
+html.sunGame #viewBtn.fp { border-color: rgba(240,222,170,.7); box-shadow: 0 0 10px rgba(255,233,176,.25); }
+@media (hover: hover) { html.sunGame #soundBtn:hover, html.sunGame #viewBtn:hover { background: rgba(255,248,230,.12); } }
+html.sunGame #soundBtn:active, html.sunGame #viewBtn:active { background: rgba(255,248,230,.2); transform: scale(.94); }
+html.sunGame #soundBtn:focus-visible, html.sunGame #viewBtn:focus-visible { outline: 1px solid rgba(240,222,170,.75); outline-offset: -3px; }
+#gate .sub { margin: 0; font-size: 13px; opacity: .85; letter-spacing: .12em; text-shadow: 0 1px 8px rgba(6,24,26,.9); }
+#gate .tap { margin: 18px 0 0; padding: 11px 30px; border-radius: 30px; font-size: 15px; letter-spacing: .1em;
+             background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.55); backdrop-filter: blur(4px);
+             animation: tapPulse 2.2s ease-in-out infinite; }
+@keyframes tapPulse { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+
+/* 操作の説明（歩きはじめたら消える）。ボタンではないので、板・枠で囲まない：文字だけ。濃い影とふちどりで、明るい世界でも暗い世界でも読める */
+#help { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5;
+        font-size: 12.5px; white-space: nowrap; pointer-events: none; color: #fffdf2; transition: opacity 1.2s ease;
+        text-shadow: 0 0 2px rgba(4,14,18,.95), 0 1px 3px rgba(4,14,18,.95), 0 0 7px rgba(4,14,18,.8), 0 0 16px rgba(4,14,18,.55); }
+#help.off { opacity: 0; }
+#help .touch { display: none; }
+body.touch #help .touch { display: inline; }
+body.touch #help .pc { display: none; }
+
+/* 移動のつまみ（さわった所に出る） */
+#stick { position: fixed; z-index: 6; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; display: none; pointer-events: none;
+         border: 1.5px solid rgba(255,255,255,.4); background: rgba(255,255,255,.07); }
+#stick.on { display: block; }
+/* タッチの端末：スティックは左下に いつも出ている（area_kit.js の createWalkControls が .fixed を付ける）。操作が止まっている間（.locked）は消える。
+   --lift ＝ 妖精のセリフの枠が左下にかかるとき、その上へよける高さ。つまみは、指をはなすと静かにまん中へもどる */
+body.touch #stick.fixed { display: block; left: calc(26px + env(safe-area-inset-left)); top: auto; bottom: calc(26px + env(safe-area-inset-bottom) + var(--lift, 0px)); margin: 0;
+  width: 120px; height: 120px; box-sizing: border-box; opacity: .8; transition: opacity .5s ease, bottom .35s ease, border-color .2s ease; }
+body.touch #stick.fixed.on { opacity: 1; }
+body.touch #stick.fixed.locked { opacity: 0; }
+#stick.fixed #knob { transition: transform .3s cubic-bezier(.3,1.35,.5,1); }
+#stick.fixed.on #knob { transition: none; }
+/* 太陽ゲーム：UI 案 C「筆と和紙」。細い 1px の線の円、ごくうすい墨の面、つまみは淡い光の小さな円 */
+html.sunGame #stick.fixed { border: 1px solid rgba(251,246,230,.34); background: radial-gradient(circle, rgba(8,8,24,.06), rgba(8,8,24,.24) 72%, rgba(8,8,24,.1)); }
+html.sunGame #stick.fixed.on { border-color: rgba(240,222,170,.6); }
+html.sunGame #stick.fixed #knob { width: 46px; height: 46px; box-sizing: border-box; background: radial-gradient(circle, rgba(255,250,236,.62), rgba(240,222,170,.24) 62%, rgba(240,222,170,.05));
+  border: 1px solid rgba(255,248,230,.55); box-shadow: 0 0 12px rgba(255,233,176,.28); }
+#knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; border-radius: 50%; transform: translate(-50%,-50%);
+        background: rgba(255,255,255,.4); }
+
+#soundBtn { position: fixed; right: 12px; top: calc(12px + env(safe-area-inset-top)); z-index: 7; width: 44px; height: 44px; padding: 0;
+            border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(10,30,32,.4); color: #f4fbf6; cursor: pointer; }
+#soundBtn svg { width: 22px; height: 22px; vertical-align: middle; }
+#soundBtn .off { display: none; }
+#soundBtn.muted .on { display: none; }
+#soundBtn.muted .off { display: inline; }
+#soundBtn.muted { opacity: .6; }
+
+#stat { position: fixed; left: 8px; top: 8px; z-index: 7; padding: 4px 10px; border-radius: 10px; font: 600 12px/1.4 ui-monospace, monospace;
+        background: rgba(10,30,32,.5); white-space: pre; display: none; }
+body.debug #stat { display: block; }
+body.shot #gate, body.shot #help, body.shot #stick, body.shot #soundBtn, body.shot #stat { display: none !important; }
+
+/* エリアの行き来のフェード（ロードの代わり）と、お知らせ（「じゅんび中」など）。area_kit.js の createTravel が作る */
+#areaFade { position: fixed; inset: 0; z-index: 30; background: #f2faf4; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+#areaFade.on { opacity: 1; }
+#areaFade.now { transition: none; }
+/* お知らせも、板・枠で囲まない：文字だけ（白いフェードの上に出る。白いにじみを付けてあるので、景色の上に出ても読める） */
+#areaNote { position: fixed; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 31; font-size: 18px; letter-spacing: .14em;
+            white-space: nowrap; color: #2e5a50; text-shadow: 0 0 3px #fff, 0 0 8px #fff, 0 0 18px rgba(255,255,255,.95), 0 0 30px rgba(255,255,255,.8);
+            opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+#areaNote.on { opacity: 1; }
+
+/* 視点のボタン（3 人称 ⇔ 1 人称）。area_kit.js の createViewWalker が作る。音のボタンの下 */
+#viewBtn { position: fixed; right: 12px; top: calc(64px + env(safe-area-inset-top)); z-index: 7; width: 44px; height: 44px; padding: 0;
+           border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(10,30,32,.4); color: #f4fbf6; cursor: pointer; }
+#viewBtn svg { width: 22px; height: 22px; vertical-align: middle; }
+#viewBtn .fp { display: none; }
+#viewBtn.fp .fp { display: inline; }
+#viewBtn.fp .tp { display: none; }
+body.shot #viewBtn { display: none !important; }
+
+/* 昼と夜のスイッチ（文字なしのトグル）。area_kit.js の createDayNight が作る。音のボタンの左 */
+#timeBtn { position: fixed; right: 64px; top: calc(14px + env(safe-area-inset-top)); z-index: 7; width: 76px; height: 40px; padding: 0; border: 0; border-radius: 20px;
+           background: none; cursor: pointer; opacity: .9; filter: drop-shadow(0 1px 4px rgba(6,24,26,.35)); -webkit-tap-highlight-color: transparent; }
+#timeBtn svg { display: block; width: 76px; height: 40px; }
+#timeBtn .t-knob { transition: transform .5s cubic-bezier(.45,1.35,.5,1); }
+#timeBtn .t-day, #timeBtn .t-sun, #timeBtn .t-night, #timeBtn .t-moon { transition: opacity .5s ease; }
+#timeBtn .t-night, #timeBtn .t-moon { opacity: 0; }
+#timeBtn.night .t-night, #timeBtn.night .t-moon { opacity: 1; }
+#timeBtn.night .t-day, #timeBtn.night .t-sun { opacity: 0; }
+#timeBtn.night .t-knob { transform: translateX(36px); }
+body.shot #timeBtn { display: none !important; }

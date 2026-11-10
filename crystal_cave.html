@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>水晶の洞くつ｜おひさまのかけら</title>
+<link rel="icon" href="./favicon.ico" sizes="48x48">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="theme-color" content="#0a1034">
+<meta name="description" content="太陽が割れて暗くなった世界。エルフと光の妖精が、森の奥にちらばった 3 つのかけらを集める、静かで短い 3D の旅。スマホのブラウザで、そのまま遊べます。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="おひさまのかけら">
+<meta property="og:title" content="おひさまのかけら｜Pieces of Sunshine">
+<meta property="og:description" content="太陽が割れて暗くなった世界。エルフと光の妖精が、森の奥にちらばった 3 つのかけらを集める、静かで短い 3D の旅。スマホのブラウザで、そのまま遊べます。">
+<meta property="og:url" content="https://yukichiai.github.io/ohisama/crystal_cave.html">
+<meta property="og:image" content="https://yukichiai.github.io/ohisama/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="おひさまのかけら — 花の丘の景色と筆文字のタイトル">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="おひさまのかけら｜Pieces of Sunshine">
+<meta name="twitter:description" content="太陽が割れて暗くなった世界。エルフと光の妖精が、森の奥にちらばった 3 つのかけらを集める、静かで短い 3D の旅。スマホのブラウザで、そのまま遊べます。">
+<meta name="twitter:image" content="https://yukichiai.github.io/ohisama/ogp.png">
+<link rel="stylesheet" href="./area_kit.css">
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="gate">
+  <h1>水晶の洞くつ</h1>
+  <p class="tap">タップしてはじめる</p>
+</div>
+<div id="help">
+  <span class="pc">W A S D・矢印キーで歩く ／ ドラッグで見回す</span>
+  <span class="touch">左半分ドラッグで歩く ／ 右半分ドラッグで見回す</span>
+</div>
+<div id="stick"><div id="knob"></div></div>
+<button id="soundBtn" aria-label="音">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+</button>
+<div id="stat"></div>
+<script type="module" src="./crystal_cave.js"></script>
+</body>
+</html>

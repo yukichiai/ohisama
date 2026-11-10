@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32 -32 64 64">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2a62"/><stop offset="1" stop-color="#0a1034"/></linearGradient>
+<radialGradient id="g" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="24"><stop offset="0" stop-color="#fffdf4"/><stop offset=".6" stop-color="#f3e2b0"/><stop offset="1" stop-color="#d9b46a"/></radialGradient>
+<radialGradient id="h" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe2a0" stop-opacity=".35"/><stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/></radialGradient></defs>
+<rect x="-32" y="-32" width="64" height="64" rx="14" fill="url(#bg)"/>
+<circle r="30" fill="url(#h)"/>
+<g fill="url(#g)" stroke="#fff8e2" stroke-opacity=".85" stroke-width=".8" stroke-linejoin="round"><path d="M0 0L-2.36 -10.23L0.00 -21.00A21.0 21.0 0 0 0 -18.19 10.50L-7.68 7.16Z" transform="translate(-2.25 -1.30)"/><path d="M0 0L-7.68 7.16L-18.19 10.50A21.0 21.0 0 0 0 18.19 10.50L10.04 3.07Z" transform="translate(-0.00 2.60)"/><path d="M0 0L10.04 3.07L18.19 10.50A21.0 21.0 0 0 0 0.00 -21.00L-2.36 -10.23Z" transform="translate(2.25 -1.30)"/></g>
+</svg>
