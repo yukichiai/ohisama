@@ -30,6 +30,23 @@
   #help, #timeBtn { display: none !important; }
   /* 最初の画面（タイトル・言語・Start）の中身と文字は、sun_game.js が作る。読みこむまでは、暗い空だけ */
   #gate { background: linear-gradient(#0a1034, #1c2a62 62%, #33407a); }
+  /* ローディング画面（タイトルが出るまで）：HTML と CSS だけで、開いた瞬間に出る。UI 案 C の静かな見た目（暗い紺・淡い金の細い線）。sun_game.js が、タイトルの最初のコマを描いたら __sunLoad.done() で消す */
+  #sunLoad { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    background: radial-gradient(ellipse 70% 60% at 50% 46%, #1a2558 0%, #0d1438 55%, #070b22 100%); transition: opacity 1s ease; color: #f0deaa; }
+  #sunLoad.out { opacity: 0; pointer-events: none; }
+  #sunLoad svg { width: 92px; height: 92px; overflow: visible; }
+  #sunLoad .ring { fill: none; stroke: #f0deaa; stroke-width: 1.1; opacity: .55; animation: sunLoadGlow 3.2s ease-in-out infinite; }
+  #sunLoad .crack { fill: none; stroke: #fff3cf; stroke-width: 1; stroke-linecap: round; opacity: .7; animation: sunLoadGlow 3.2s ease-in-out infinite; animation-delay: -1.6s; }
+  #sunLoad .halo { fill: url(#sunLoadHalo); animation: sunLoadHalo 3.2s ease-in-out infinite; }
+  #sunLoad .dot { fill: #fff6d8; animation: sunLoadDot 2.8s ease-in-out infinite; }
+  #sunLoad .dot:nth-of-type(2) { animation-delay: -.9s; } #sunLoad .dot:nth-of-type(3) { animation-delay: -1.8s; } #sunLoad .dot:nth-of-type(4) { animation-delay: -2.4s; }
+  @keyframes sunLoadGlow { 0%, 100% { opacity: .35; } 50% { opacity: .85; } }
+  @keyframes sunLoadHalo { 0%, 100% { opacity: .25; } 50% { opacity: .55; } }
+  @keyframes sunLoadDot { 0%, 100% { opacity: .1; transform: translateY(1px); } 50% { opacity: .9; transform: translateY(-2px); } }
+  #sunLoad .bar { position: relative; width: min(46vw, 180px); height: 1px; background: rgba(240,222,170,.18); }
+  #sunLoad .bar i { position: absolute; left: 0; top: -0.5px; height: 2px; width: 0; background: linear-gradient(90deg, rgba(240,222,170,.4), #f6e6b8); box-shadow: 0 0 6px rgba(246,230,184,.7); }
+  #sunLoad .msg { font: 400 13px/1 "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Songti SC", "Batang", Georgia, serif; letter-spacing: .32em; padding-left: .32em; color: rgba(240,222,170,.72); }
+  @media (prefers-reduced-motion: reduce) { #sunLoad .ring, #sunLoad .crack, #sunLoad .halo, #sunLoad .dot { animation: none; } }
 </style>
 <script>
   // このページはいつも「太陽のない世界」のゲーム中（?game=sun）。area_kit.js が sun_game.js を読みこむ。暗い世界のとちゅうなら、はじめから夜で開く
@@ -48,6 +65,61 @@
 </script>
 </head>
 <body>
+<div id="sunLoad" role="status" aria-live="polite">
+  <svg viewBox="-50 -50 100 100" aria-hidden="true">
+    <defs><radialGradient id="sunLoadHalo"><stop offset="0" stop-color="#fff0c4" stop-opacity=".55"/><stop offset="1" stop-color="#fff0c4" stop-opacity="0"/></radialGradient></defs>
+    <circle class="halo" r="46"/>
+    <circle class="ring" r="22"/>
+    <path class="crack" d="M0 0 L0 -22 M0 0 L-19.05 11 M0 0 L19.05 11 M0 -9 L-4 -14 M-8 4.5 L-13.5 2 M8 4.5 L10 9.5"/>
+    <circle class="dot" cx="-34" cy="-18" r="1.3"/><circle class="dot" cx="31" cy="-26" r="1.1"/><circle class="dot" cx="37" cy="20" r="1.4"/><circle class="dot" cx="-28" cy="30" r="1"/>
+  </svg>
+  <div class="bar"><i></i></div>
+  <div class="msg">よみこみ中…</div>
+</div>
+<script>
+  // ローディング画面：言語（保存した言語 → ブラウザの言語）の字と、読みこみの進み具合。進み具合 ＝ 読みおわったファイルの大きさ ＋ 読んでいるとちゅうのファイル（fetch。エルフのモデルなど）の大きさ ÷ タイトルに要る全体の目安。
+  //   表示はなめらかに追いかけ、もどらない。止まって見えないよう、少しずつ進む（95% まで）。sun_game.js が done() を呼ぶと 100% → 静かにフェードアウト
+  (function () {
+    var el = document.getElementById('sunLoad'), bar = el.querySelector('.bar i'), msg = el.querySelector('.msg');
+    var T = { ja: 'よみこみ中…', en: 'Loading…', zh: '加载中…', ko: '불러오는 중…' }, l = null;
+    try { l = localStorage.getItem('sunGame_lang'); } catch (e) {}
+    if (!T[l]) { var n = (navigator.language || 'ja').toLowerCase(); l = n.indexOf('zh') === 0 ? 'zh' : n.indexOf('ko') === 0 ? 'ko' : n.indexOf('ja') === 0 ? 'ja' : 'en'; }
+    msg.textContent = T[l]; msg.lang = { ja: 'ja', en: 'en', zh: 'zh-Hans', ko: 'ko' }[l];
+    var LOG = [], EXPECT = 7.6e6, done = 0, inflight = {}, shown = 0, t0 = performance.now(), last = t0, finished = false;
+    try { new PerformanceObserver(function (list) { list.getEntries().forEach(function (e) { done += e.decodedBodySize || e.transferSize || 0; delete inflight[e.name]; }); }).observe({ type: 'resource', buffered: true }); } catch (e) {}
+    var of = window.fetch && window.fetch.bind(window);
+    if (of && window.ReadableStream) window.fetch = function (input, init) {
+      return of(input, init).then(function (r) {
+        if (finished || !r.body || !r.ok) return r;
+        var url = r.url, rd = r.body.getReader(); inflight[url] = 0;
+        var s = new ReadableStream({ pull: function (c) { return rd.read().then(function (x) { if (x.done) { c.close(); return; } if (url in inflight) inflight[url] += x.value.length; c.enqueue(x.value); }); }, cancel: function (why) { return rd.cancel(why); } });
+        var out = new Response(s, { status: r.status, statusText: r.statusText, headers: r.headers });
+        try { Object.defineProperty(out, 'url', { value: r.url }); } catch (e) {}
+        return out;
+      });
+    };
+    function frame(now) {
+      if (!el.parentNode) return;
+      var dt = Math.min(0.1, (now - last) / 1000); last = now;
+      var fly = 0; for (var k in inflight) fly += inflight[k];
+      var target = finished ? 1 : Math.min(0.95, (done + fly) / EXPECT);
+      var creep = finished ? 0 : Math.min(0.95, shown + dt * 0.006);      // 止まって見えないよう、ごくゆっくり進む
+      shown = Math.max(shown, creep, shown + (target - shown) * (1 - Math.exp(-dt * (finished ? 9 : 3.5))));
+      bar.style.width = (shown * 100).toFixed(1) + '%';
+      if (now - (frame.lt || 0) > 500) { frame.lt = now; LOG.push([+(now / 1000).toFixed(1), +shown.toFixed(2), +target.toFixed(2)]); }      // 確認用（__sunLoad.log）
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    window.__sunLoad = {
+      get progress() { return shown; }, log: LOG,
+      done: function () {
+        if (finished) return; finished = true;
+        setTimeout(function () { el.classList.add('out'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); window.fetch = of || window.fetch; }, 1100); }, 450);
+      },
+    };
+    setTimeout(function () { window.__sunLoad.done(); }, 45000);      // 万一 合図が来なくても、45 秒でタイトルを見せる
+  })();
+</script>
 <div id="gate"></div>
 <div id="help"></div>
 <div id="stick"><div id="knob"></div></div>

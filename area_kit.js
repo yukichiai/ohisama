@@ -1322,12 +1322,14 @@ function showAreaName(params) {
   gateEl.classList.add('sunArea'); gateEl.dataset.lang = lang;      // 日本語のそえ書きは出さず、ボタンは「Start」（タイトル画面と同じ）。data-lang ＝ エリア名の字を言語ごとに決める（area_kit.css の UI 案 C）
   const tap = gateEl.querySelector('.tap'); if (tap) tap.textContent = 'Start';
 }
-// 太陽ゲーム（?game=sun）で、ほかのエリアから来たとき（?from=）：はじめの画面に Start を出さない。読みこみ中は暗い画面にエリア名だけ（ページの読みこみ直後から。area_kit.css の html.sunAuto）、
+// 太陽ゲーム（?game=sun）のエリアのページ（ほかのエリアから来たときも、URL を直接開いたときも、再読みこみも）：はじめの画面に Start を出さない。読みこみ中は暗い画面にエリア名だけ（ページの読みこみ直後から。area_kit.css の html.sunAuto）、
 //   準備ができたら（景色が数コマ描けたら）エリア名を少し見せて、画面ぜんたいを静かにフェードして消す。操作はすぐできる（画面は押せない ＝ 指やクリックは、そのまま景色の操作へ）。
 //   音：ブラウザは、ページを移ったあと、何か押すまで音を鳴らせないことがある。なので着いたときに一度ためし（鳴らせるブラウザでは、そのまま鳴る）、鳴らせなかったら、最初のキー・タップ・クリックで鳴らしはじめる
 //   花の丘（太陽ゲームの中心。sun_game.js が はじめの画面を使う）は、エリア名を出さず、今までどおり すぐ はじめの画面を消して、暗い色から短く明ける（createTravel）
-const SUN_Q = new URLSearchParams(location.search), SUN_HILL = /sun_start|flower_hill/.test(location.pathname);
-const SUN_AUTO = SUN_Q.get('game') === 'sun' && SUN_Q.has('from') && !SUN_Q.has('shot'), SUN_AREA_AUTO = SUN_AUTO && !SUN_HILL;
+//   花の丘かどうかは、ページが flower_hill.js を読むかで決める（公開版では花の丘が /ohisama/（index.html）なので、ファイルの名前では分からない）
+const SUN_Q = new URLSearchParams(location.search), SUN_GAME_Q = SUN_Q.get('game') === 'sun' && !SUN_Q.has('shot');
+const SUN_HILL = !!document.querySelector('script[src*="flower_hill"]') || /sun_start|flower_hill/.test(location.pathname);
+const SUN_AREA_AUTO = SUN_GAME_Q && !SUN_HILL, SUN_AUTO = SUN_AREA_AUTO || (SUN_GAME_Q && SUN_Q.has('from'));      // 花の丘は、ほかのエリアから来たときだけ（はじめは sun_game.js のタイトル画面）
 if (SUN_Q.get('game') === 'sun') document.documentElement.classList.add('sunGame');
 if (SUN_AUTO) { document.documentElement.classList.add('sunAuto'); if (SUN_AREA_AUTO) showAreaName(SUN_Q); }
 export function wireStart({ params, controls, audio }) {
@@ -1353,6 +1355,7 @@ export function wireStart({ params, controls, audio }) {
   window.addEventListener('keydown', () => { if (!gateEl.classList.contains('off')) start(); });
   soundBtn.addEventListener('click', () => { audio.unlock(); audio.setMuted(!audio.isMuted()); soundBtn.classList.toggle('muted', audio.isMuted()); soundBtn.blur(); });
   if (params.has('shot')) controls.lock(false);
+  gateEl.classList.add('ready');                   // ここで はじめて「タップしてはじめる」を出す（ページの準備ができる前は、押しても何も起きないので出さない。area_kit.css）
 }
 
 // ================================================================ エリアの行き来：短いフェード（ロードの代わり）をはさんで別のページへ移る。まだ無いエリアは、お知らせを出して戻す

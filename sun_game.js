@@ -1440,6 +1440,12 @@ function init([gName, area]) {
     //   Start：ロゴとボタンが消える（0.9 秒）のと同時に、静かに黒へ（1.6 秒）→ 1 回目は、オープニングの最初（真っ暗）へ。2 回目からは、黒から花の丘へもどって、そのまま操作
     const fadeEl = document.createElement('div'); fadeEl.id = 'sunFade'; document.body.append(fadeEl);
     st.title = !!(gateEl && !gateEl.classList.contains('off')); st.titleT = 0; st.titleOut = -1; if (st.title) document.body.classList.add('sun-intro', 'sun-title');      // タイトルの間は、右上の音・視点のボタンも出さない
+    // ローディング画面（sun_start.html の #sunLoad）：エルフのモデル・タイトルのロゴ・字がそろい、景色を 2 コマ描いたら、静かに消す
+    if (window.__sunLoad) {
+      const logoOK = () => new Promise((res) => { const t = performance.now(), chk = () => { const im = gateEl && gateEl.querySelector('.sunLogo'); if (!im || im.classList.contains('on') || performance.now() - t > 15000) res(); else setTimeout(chk, 100); }; chk(); });
+      Promise.all([walker.ready ? walker.ready() : null, st.title ? logoOK() : null, document.fonts ? document.fonts.ready : null].map((p) => Promise.resolve(p).catch(() => {}))).then(() => {
+        const f0 = G.frames || 0, t = performance.now(), wait = () => ((G.frames || 0) >= f0 + 2 || performance.now() - t > 3000 ? window.__sunLoad.done() : requestAnimationFrame(wait)); wait(); });
+    }
     const _tc = V3(0, 0, 0), _tt = V3(0, 0, 0);
     function titleCam(t) {
       const side = V3(-WD.z, 0, WD.x), k = Math.sin(t * 0.045) * 3.5;

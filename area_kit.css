@@ -9,6 +9,10 @@ canvas { display: block; touch-action: none; }
         cursor: pointer; text-align: center; background: radial-gradient(ellipse at 50% 42%, rgba(12,32,34,.15), rgba(8,22,26,.72));
         transition: opacity .9s ease; }
 #gate.off { opacity: 0; pointer-events: none; }
+/* ページの準備ができるまで（area_kit.js の wireStart が #gate に .ready を付けるまで）は、「タップしてはじめる」・そえ書き・エリア名を出さない（暗い画面だけ）。
+   まだ押しても何も起きないうえ、太陽ゲームでは、読みこみの数秒間に HTML のままの「タップしてはじめる」が見えてしまっていたため。
+   太陽ゲームのエリア名（.sunArea）は、area_kit.js が読みこまれた直後から出す */
+#gate:not(.ready) .tap, #gate:not(.ready) .sub, #gate:not(.ready):not(.sunArea) h1 { visibility: hidden; }
 #gate h1 { margin: 0; font-size: clamp(26px, 6vw, 44px); letter-spacing: .28em; text-indent: .28em; font-weight: 700;
            text-shadow: 0 2px 18px rgba(6,24,26,.8), 0 0 40px rgba(255,214,230,.35); }
 /* エリア名：オリジナルの字「Ohisama Title」（「おひさまのかけら」のタイトルと同じ字。fonts/ohisama_title.woff2）。area_kit.js の wireStart が、表にあるエリア名の <h1> に .areaName を付ける
